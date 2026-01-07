@@ -12,7 +12,11 @@ echo "   Bonus Shoes 完整修復腳本"
 echo "============================================"
 echo ""
 
-cd /home/jarvis/project/bonus/bonus.shoes
+# 使用腳本所在的目錄
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+echo "📍 工作目錄: $SCRIPT_DIR"
+echo ""
 
 # Step 1: 修復主機端權限
 echo "📂 [1/6] 修復主機端檔案權限..."
