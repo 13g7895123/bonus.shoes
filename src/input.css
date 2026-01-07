@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components{
+    .table-class{
+        @apply table-auto border-collapse border border-slate-500 m-auto mt-3 max-h-[80vh] overflow-x-scroll
+    }
+    .th-class{
+        @apply border border-slate-600 px-3
+    }
+    .td-class{
+        @apply border border-slate-700 px-3 table-cell first:text-center
+    }
+}
+
+@layer base{
+    table > tbody > tr > td{
+        @apply td-class
+    }
+}
