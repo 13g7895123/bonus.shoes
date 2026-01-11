@@ -1,0 +1,32 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main  # Adjust this if your main branch is named differently (e.g., 'master')
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+          cd /path/to/your/project  # Change this to your actual project path on VPS
+          git pull origin main
+          
+          # Optional: Run composer install if you have dependencies to update
+          # docker compose exec -T php composer install --no-dev --optimize-autoloader
+          
+          # Optional: Run migrations
+          # docker compose exec -T php php spark migrate
+          
+          # Restart containers to apply changes (optional but recommended)
+          # docker compose down
+          # docker compose up -d --build
