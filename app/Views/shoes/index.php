@@ -433,7 +433,77 @@
         }
         
         // 獲取當前頁面資料
-        functio每頁顯示數量變更
+        function getCurrentPageData() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            return filteredData.slice(startIndex, endIndex);
+        }
+        
+        // 渲染分頁
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                $('#paginationContainer').addClass('hidden');
+                return;
+            }
+            
+            $('#paginationContainer').removeClass('hidden');
+            
+            // 更新範圍顯示
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
+            $('#rangeStart').text(startIndex);
+            $('#rangeEnd').text(endIndex);
+            $('#totalItems').text(filteredData.length);
+            
+            // 更新按鈕狀態
+            $('#firstPageBtn').prop('disabled', currentPage === 1);
+            $('#prevPageBtn').prop('disabled', currentPage === 1);
+            $('#nextPageBtn').prop('disabled', currentPage === totalPages);
+            $('#lastPageBtn').prop('disabled', currentPage === totalPages);
+            
+            // 渲染頁碼
+            const $pageNumbers = $('#pageNumbers');
+            $pageNumbers.empty();
+            
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (currentPage <= 3) {
+                endPage = Math.min(5, totalPages);
+            }
+            if (currentPage >= totalPages - 2) {
+                startPage = Math.max(1, totalPages - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50';
+                const btn = $(`
+                    <button class="pagination-btn px-4 py-2 border border-gray-300 rounded-lg ${activeClass} text-base min-w-[44px]" data-page="${i}">
+                        ${i}
+                    </button>
+                `);
+                
+                btn.on('click', function() {
+                    goToPage($(this).data('page'));
+                });
+                
+                $pageNumbers.append(btn);
+            }
+        }
+        
+        // 前往指定頁面
+        function goToPage(page) {
+            currentPage = page;
+            renderTable(getCurrentPageData());
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 設定事件監聽器
+        function setupEventListeners() {
+            // 每頁顯示數量變更
             $('#itemsPerPage').on('change', function() {
                 itemsPerPage = parseInt($(this).val());
                 currentPage = 1;
@@ -460,6 +530,20 @@
             
             // 價格篩選
             $('#priceFilter').on('change', applyFilters);
+            
+            // 分頁按鈕
+            $('#firstPageBtn').on('click', () => goToPage(1));
+            $('#prevPageBtn').on('click', () => goToPage(Math.max(1, currentPage - 1)));
+            $('#nextPageBtn').on('click', () => goToPage(Math.min(Math.ceil(filteredData.length / itemsPerPage), currentPage + 1)));
+            $('#lastPageBtn').on('click', () => goToPage(Math.ceil(filteredData.length / itemsPerPage)));
+        }
+
+        // 應用篩選
+        function applyFilters() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const actionFilter = $('#actionFilter').val();
+            const priceFilter = $('#priceFilter').val();
+            
             filteredData = allTableData.filter(item => {
                 // 搜尋篩選
                 const matchSearch = !searchTerm || 
@@ -495,91 +579,7 @@
             currentPage = 1;
             updateTotalCount(filteredData.length);
             renderTable(getCurrentPageData());
-            renderPagination(
-                    <button class="pagination-btn px-4 py-2 border border-gray-300 rounded-lg ${activeClass} text-base min-w-[44px]" data-page="${i}">
-                        ${i}
-                    </button>
-                `);
-                
-                btn.on('click', function() {
-                    goToPage($(this).data('page'));
-                });
-                
-                $pageNumbers.append(btn);
-            }
-        }
-        
-        // 前往指定頁面
-        function goToPage(page) {
-            currentPage = page;
-            renderTable(getCurrentPageData());
             renderPagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // 設定事件監聽器
-        function setupEventListeners() {
-            // 重新整理按鈕
-            $('#refreshBtn').on('click', function() {
-                const btn = $(this);
-                btn.find('svg').addClass('animate-spin');
-                loadTableData().finally(() => {
-                    setTimeout(() => {
-                        btn.find('svg').removeClass('animate-spin');
-                    }, 500);
-                });
-            });
-            
-            // 搜尋功能
-            $('#searchInput').on('input', debounce(applyFilters, 300));
-            
-            // 狀態篩選
-            $('#actionFilter').on('change', applyFilters);
-            
-            // 價格篩選
-            $('#priceFilter').on('change', applyFilters);
-        }
-
-        // 應用篩選
-        function applyFilters() {
-            const searchTerm = $('#searchInput').val().toLowerCase();
-            const actionFilter = $('#actionFilter').val();
-            const priceFilter = $('#priceFilter').val();
-            
-            let filteredData = allTableData.filter(item => {
-                // 搜尋篩選
-                const matchSearch = !searchTerm || 
-                    (item.eng_name && item.eng_name.toLowerCase().includes(searchTerm)) ||
-                    (item.code && item.code.toLowerCase().includes(searchTerm));
-                
-                // 狀態篩選
-                const matchAction = !actionFilter || item.action === actionFilter;
-                
-                // 價格篩選
-                let matchPrice = true;
-                if (priceFilter) {
-                    const price = parseInt(item.price) || 0;
-                    switch(priceFilter) {
-                        case '0-3000':
-                            matchPrice = price <= 3000;
-                            break;
-                        case '3000-5000':
-                            matchPrice = price > 3000 && price <= 5000;
-                            break;
-                        case '5000-10000':
-                            matchPrice = price > 5000 && price <= 10000;
-                            break;
-                        case '10000+':
-                            matchPrice = price > 10000;
-                            break;
-                    }
-                }
-                
-                return matchSearch && matchAction && matchPrice;
-            });
-            
-            updateTotalCount(filteredData.length);
-            renderTable(filteredData);
         }
 
         // 防抖函數
