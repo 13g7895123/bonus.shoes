@@ -160,10 +160,11 @@
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-700">每頁顯示</label>
                         <select id="itemsPerPage" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base">
-                            <option value="10">10</option>
-                            <option value="20" selected>20</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
+                            <option value="10">10 筆</option>
+                            <option value="20" selected>20 筆</option>
+                            <option value="50">50 筆</option>
+                            <option value="100">100 筆</option>
+                            <option value="all">全部</option>
                         </select>
                     </div>
                     <button id="refreshBtn" class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-base">
@@ -437,6 +438,10 @@
         
         // 獲取當前頁面資料
         function getCurrentPageData() {
+            // 如果選擇全部，返回所有資料
+            if (itemsPerPage === 'all') {
+                return filteredData;
+            }
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             return filteredData.slice(startIndex, endIndex);
@@ -444,6 +449,12 @@
         
         // 渲染分頁
         function renderPagination() {
+            // 如果選擇全部，隱藏分頁控制
+            if (itemsPerPage === 'all') {
+                $('#paginationContainer').addClass('hidden');
+                return;
+            }
+            
             const totalPages = Math.ceil(filteredData.length / itemsPerPage);
             
             if (totalPages <= 1) {
@@ -454,11 +465,17 @@
             $('#paginationContainer').removeClass('hidden');
             
             // 更新範圍顯示
-            const startIndex = (currentPage - 1) * itemsPerPage + 1;
-            const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
-            $('#rangeStart').text(startIndex);
-            $('#rangeEnd').text(endIndex);
-            $('#totalItems').text(filteredData.length);
+            if (itemsPerPage === 'all') {
+                $('#rangeStart').text(1);
+                $('#rangeEnd').text(filteredData.length);
+                $('#totalItems').text(filteredData.length);
+            } else {
+                const startIndex = (currentPage - 1) * itemsPerPage + 1;
+                const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
+                $('#rangeStart').text(startIndex);
+                $('#rangeEnd').text(endIndex);
+                $('#totalItems').text(filteredData.length);
+            }
             
             // 更新按鈕狀態
             $('#firstPageBtn').prop('disabled', currentPage === 1);
@@ -508,7 +525,8 @@
         function setupEventListeners() {
             // 每頁顯示數量變更
             $('#itemsPerPage').on('change', function() {
-                itemsPerPage = parseInt($(this).val());
+                const value = $(this).val();
+                itemsPerPage = value === 'all' ? 'all' : parseInt(value);
                 currentPage = 1;
                 renderTable(getCurrentPageData());
                 renderPagination();
@@ -537,8 +555,16 @@
             // 分頁按鈕
             $('#firstPageBtn').on('click', () => goToPage(1));
             $('#prevPageBtn').on('click', () => goToPage(Math.max(1, currentPage - 1)));
-            $('#nextPageBtn').on('click', () => goToPage(Math.min(Math.ceil(filteredData.length / itemsPerPage), currentPage + 1)));
-            $('#lastPageBtn').on('click', () => goToPage(Math.ceil(filteredData.length / itemsPerPage)));
+            $('#nextPageBtn').on('click', () => {
+                if (itemsPerPage !== 'all') {
+                    goToPage(Math.min(Math.ceil(filteredData.length / itemsPerPage), currentPage + 1));
+                }
+            });
+            $('#lastPageBtn').on('click', () => {
+                if (itemsPerPage !== 'all') {
+                    goToPage(Math.ceil(filteredData.length / itemsPerPage));
+                }
+            });
         }
 
         // 應用篩選
