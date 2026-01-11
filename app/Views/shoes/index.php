@@ -293,6 +293,9 @@
         const API_BASE_URL = '<?= base_url('api/shoes') ?>';
         const IMG_SIZE = 100;
         let allTableData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let itemsPerPage = 20;
 
         // 初始化
         function init() {
