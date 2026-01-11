@@ -2,7 +2,9 @@
 module.exports = {
   mode: 'jit',
   content: [
-    "./index.php"
+    "./index.php",
+    "../app/Views/**/*.php",
+    "../app/Views/**/*.html"
   ],
   theme: {
     extend: {},

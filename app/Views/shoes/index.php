@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bonus Shoes - 鞋子資料管理系統</title>
 
-    <!-- 引入Tailwind -->
-    <link rel="stylesheet" href="<?= base_url('dist/output.css') ?>">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入jQuery -->
-    <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
     <style>
         /* 自定義滾動條 */
