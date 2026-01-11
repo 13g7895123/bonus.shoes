@@ -5,55 +5,247 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>更新資料 - Bonus Shoes</title>
+    <title>Bonus Shoes - 鞋子資料管理系統</title>
 
     <!-- 引入Tailwind -->
     <link rel="stylesheet" href="<?= base_url('dist/output.css') ?>">
     <!-- 引入jQuery -->
     <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+    
+    <style>
+        /* 自定義滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* 載入動畫 */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 淡入動畫 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 表格動畫 */
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            transform: translateX(4px);
+            box-shadow: -4px 0 0 #3b82f6;
+        }
+        
+        /* 圖片容器 */
+        .img-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .img-container:hover {
+            transform: scale(1.05);
+        }
+        
+        .img-container img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 狀態徽章 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-add {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-update {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+        
+        .badge-delete {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
 </head>
 
-<body class='max-h-[80vh]' style="max-width: 1280px; margin-left:auto; margin-right:auto;">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-6 text-center">鞋子資料管理系統</h1>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 rounded-lg p-2">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Bonus Shoes</h1>
+                        <p class="text-sm text-gray-500">鞋子資料管理系統</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="refreshBtn" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        重新整理
+                    </button>
+                    <div id="totalCount" class="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
+                        載入中...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-        <table class="table-class w-full">
-            <thead>
-                <tr>
-                    <th class="th-class">ID</th>
-                    <th class="th-class">圖片</th>
-                    <th class="th-class">英文名稱</th>
-                    <th class="th-class">商品代碼</th>
-                    <th class="th-class">希望價格</th>
-                    <th class="th-class">價格</th>
-                    <th class="th-class">點數</th>
-                    <th class="th-class">尺寸</th>
-                    <th class="th-class">動作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <h3 class='hidden text-center text-xl mt-10'>資料沒有更新</h3>
-    </div>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 搜尋和篩選區域 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">搜尋</label>
+                    <input type="text" id="searchInput" placeholder="搜尋商品名稱或代碼..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">狀態篩選</label>
+                    <select id="actionFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">全部狀態</option>
+                        <option value="新增">新增</option>
+                        <option value="更新">更新</option>
+                        <option value="刪除">刪除</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">價格範圍</label>
+                    <select id="priceFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">全部價格</option>
+                        <option value="0-3000">0 - 3,000</option>
+                        <option value="3000-5000">3,000 - 5,000</option>
+                        <option value="5000-10000">5,000 - 10,000</option>
+                        <option value="10000+">10,000+</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <!-- 資料表格 -->
+        <div id="tableContainer" class="bg-white rounded-xl shadow-sm overflow-hidden" style="display: none;">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">圖片</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">商品名稱</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">商品代碼</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">希望價格</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">價格</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">點數</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">尺寸</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 無資料訊息 -->
+        <div id="noDataMessage" class="hidden">
+            <div class="bg-white rounded-xl shadow-sm p-12 text-center">
+                <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">目前沒有資料</h3>
+                <p class="text-gray-500">請稍後再試或聯繫管理員</p>
+            </div>
+        </div>
+    </main>
 
     <script>
         // API 端點配置
         const API_BASE_URL = '<?= base_url('api/shoes') ?>';
         const IMG_SIZE = 100;
+        let allTableData = [];
+
+        // 初始化
+        function init() {
+            loadTableData();
+            setupEventListeners();
+        }
 
         // 載入資料
         async function loadTableData() {
+            showLoading();
+            
             try {
                 const response = await fetch(API_BASE_URL);
                 const result = await response.json();
 
+                hideLoading();
+
                 if (result.success && result.data.length > 0) {
+                    allTableData = result.data;
+                    updateTotalCount(result.data.length);
                     renderTable(result.data);
                 } else {
                     showNoDataMessage();
                 }
             } catch (error) {
                 console.error('載入資料失敗:', error);
+                hideLoading();
                 showNoDataMessage();
             }
         }
@@ -62,58 +254,186 @@
         function renderTable(data) {
             const tbody = $('tbody');
             tbody.empty();
-
-            data.forEach(item => {
-                const color = getActionColor(item.action);
+            
+            if (!data || data.length === 0) {
+                showNoDataMessage();
+                return;
+            }
+            
+            $('#tableContainer').show();
+            $('#noDataMessage').addClass('hidden');
+            
+            data.forEach((item, index) => {
+                const statusBadge = getStatusBadge(item.action);
                 const imageUrl = `https://www.kishispo.net/upload/save_image/${item.code}.jpg`;
-
-                tbody.append(`
-                    <tr class="hover:bg-gray-50">
-                        <td class="border px-4 py-2">${item.id}</td>
-                        <td class="border px-4 py-2">
-                            <img src="${imageUrl}" 
-                                 width="${IMG_SIZE}" 
-                                 height="${IMG_SIZE}"
-                                 alt="${item.eng_name}"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'%3E%3Crect fill=\\'%23ddd\\' width=\\'100\\' height=\\'100\\'/%3E%3Ctext fill=\\'%23999\\' x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dy=\\'.3em\\'%3E無圖片%3C/text%3E%3C/svg%3E'">
+                const delay = index * 30;
+                
+                const row = $(`
+                    <tr class="hover:bg-gray-50 transition-colors" style="animation: fadeIn 0.3s ease ${delay}ms both;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${item.id || '-'}
                         </td>
-                        <td class="border px-4 py-2">${item.eng_name || '-'}</td>
-                        <td class="border px-4 py-2">${item.code || '-'}</td>
-                        <td class="border px-4 py-2">${item.hope_price || '-'}</td>
-                        <td class="border px-4 py-2">${item.price || '-'}</td>
-                        <td class="border px-4 py-2">${item.point || '-'}</td>
-                        <td class="border px-4 py-2">${item.size || '-'}</td>
-                        <td class="border px-4 py-2" style="color: ${color}; font-weight: bold;">
-                            ${item.action || '-'}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="img-container" style="width: ${IMG_SIZE}px; height: ${IMG_SIZE}px;">
+                                <img src="${imageUrl}" 
+                                     alt="${item.eng_name || '商品圖片'}"
+                                     loading="lazy"
+                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22${IMG_SIZE}%22 height=%22${IMG_SIZE}%22%3E%3Crect fill=%22%23e5e7eb%22 width=%22${IMG_SIZE}%22 height=%22${IMG_SIZE}%22/%3E%3Ctext fill=%22%239ca3af%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22sans-serif%22 font-size=%2212%22%3E無圖片%3C/text%3E%3C/svg%3E';">
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <div class="font-medium">${item.eng_name || '-'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                            ${item.code || '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${formatPrice(item.hope_price)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                            ${formatPrice(item.price)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            ${item.point || '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            ${item.size || '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${statusBadge}
                         </td>
                     </tr>
                 `);
+                
+                tbody.append(row);
             });
         }
 
-        // 取得動作顏色
-        function getActionColor(action) {
-            switch (action) {
-                case '新增':
-                    return 'green';
-                case '更新':
-                    return 'orange';
-                case '刪除':
-                    return 'red';
-                default:
-                    return 'black';
-            }
+        // 取得狀態徽章
+        function getStatusBadge(action) {
+            const badges = {
+                '新增': '<span class="status-badge badge-add">新增</span>',
+                '更新': '<span class="status-badge badge-update">更新</span>',
+                '刪除': '<span class="status-badge badge-delete">刪除</span>'
+            };
+            
+            return badges[action] || `<span class="status-badge">${action || '-'}</span>`;
         }
 
-        // 顯示無資料訊息
+        // 格式化價格
+        function formatPrice(price) {
+            if (!price || price === '-') return '-';
+            return `NT$ ${parseInt(price).toLocaleString('zh-TW')}`;
+        }
+
+        // 更新總數量
+        function updateTotalCount(count) {
+            $('#totalCount').html(`
+                <span class="font-semibold text-gray-900">${count}</span> 
+                <span class="text-gray-500">筆資料</span>
+            `);
+        }
+
+        // 顯示載入中
+        function showLoading() {
+            $('#loadingSpinner').show();
+            $('#tableContainer').hide();
+            $('#noDataMessage').addClass('hidden');
+        }
+
+        // 隱藏載入中
+        function hideLoading() {
+            $('#loadingSpinner').hide();
+        }
+
+        // 顯示無資料
         function showNoDataMessage() {
-            $('table').css('display', 'none');
-            $('h3').css('display', 'block');
+            $('#tableContainer').hide();
+            $('#noDataMessage').removeClass('hidden');
+            updateTotalCount(0);
         }
 
-        // 頁面載入時執行
+        // 設定事件監聽器
+        function setupEventListeners() {
+            // 重新整理按鈕
+            $('#refreshBtn').on('click', function() {
+                const btn = $(this);
+                btn.find('svg').addClass('animate-spin');
+                loadTableData().finally(() => {
+                    setTimeout(() => {
+                        btn.find('svg').removeClass('animate-spin');
+                    }, 500);
+                });
+            });
+            
+            // 搜尋功能
+            $('#searchInput').on('input', debounce(applyFilters, 300));
+            
+            // 狀態篩選
+            $('#actionFilter').on('change', applyFilters);
+            
+            // 價格篩選
+            $('#priceFilter').on('change', applyFilters);
+        }
+
+        // 應用篩選
+        function applyFilters() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const actionFilter = $('#actionFilter').val();
+            const priceFilter = $('#priceFilter').val();
+            
+            let filteredData = allTableData.filter(item => {
+                // 搜尋篩選
+                const matchSearch = !searchTerm || 
+                    (item.eng_name && item.eng_name.toLowerCase().includes(searchTerm)) ||
+                    (item.code && item.code.toLowerCase().includes(searchTerm));
+                
+                // 狀態篩選
+                const matchAction = !actionFilter || item.action === actionFilter;
+                
+                // 價格篩選
+                let matchPrice = true;
+                if (priceFilter) {
+                    const price = parseInt(item.price) || 0;
+                    switch(priceFilter) {
+                        case '0-3000':
+                            matchPrice = price <= 3000;
+                            break;
+                        case '3000-5000':
+                            matchPrice = price > 3000 && price <= 5000;
+                            break;
+                        case '5000-10000':
+                            matchPrice = price > 5000 && price <= 10000;
+                            break;
+                        case '10000+':
+                            matchPrice = price > 10000;
+                            break;
+                    }
+                }
+                
+                return matchSearch && matchAction && matchPrice;
+            });
+            
+            updateTotalCount(filteredData.length);
+            renderTable(filteredData);
+        }
+
+        // 防抖函數
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 當文件載入完成時執行
         $(document).ready(function() {
-            loadTableData();
+            init();
         });
     </script>
 </body>
