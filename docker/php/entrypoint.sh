@@ -30,14 +30,13 @@ mkdir -p /var/www/html/writable/cache \
          /var/www/html/writable/uploads \
          /var/www/html/writable/debugbar
 
-# 如果以 root 運行，設置正確的所有權
-if [ "$(id -u)" = "0" ]; then
-    chown -R www-data:www-data /var/www/html/writable
-    chown -R www-data:www-data /var/www/html/vendor 2>/dev/null || true
-    chown www-data:www-data /var/www/html/composer.lock 2>/dev/null || true
-fi
+# 設置正確的所有權和權限
+chown -R www-data:www-data /var/www/html/writable
+chown -R www-data:www-data /var/www/html/vendor 2>/dev/null || true
+chown www-data:www-data /var/www/html/composer.lock 2>/dev/null || true
 
-chmod -R 775 /var/www/html/writable
+# 設置完全寫入權限
+chmod -R 777 /var/www/html/writable
 
 echo "✅ 權限設置完成"
 
