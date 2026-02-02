@@ -62,7 +62,7 @@ sleep 15
 
 # Step 5: 在容器內以 root 安裝依賴並修復權限
 echo "📦 [5/5] 安裝依賴並修復權限..."
-docker compose exec -T -u root php bash -c '
+docker compose exec -T -u root php sh -c '
     # 安裝 Composer 依賴
     echo "📦 安裝 Composer 依賴..."
     composer install --no-interaction --optimize-autoloader
