@@ -44,14 +44,7 @@ class ShoesApiController extends ResourceController
                 ], 400);
             }
 
-            if (empty($json['size'])) {
-                return $this->fail([
-                    'status' => 'error',
-                    'message' => '尺寸不可為空',
-                    'error_code' => 'MISSING_REQUIRED_FIELD',
-                    'field' => 'size'
-                ], 400);
-            }
+            // size 允許為空，不進行驗證
 
             // 查詢商品
             $existing = $this->model->where('code', $json['code'])->first();
@@ -67,7 +60,8 @@ class ShoesApiController extends ResourceController
 
             // 檢查是否需要更新
             $needsUpdate = false;
-            if ($existing['price'] != $json['price'] || $existing['size'] != $json['size']) {
+            $newSize = $json['size'] ?? '';
+            if ($existing['price'] != $json['price'] || $existing['size'] != $newSize) {
                 $needsUpdate = true;
             }
 
